@@ -1,3 +1,15 @@
+*
+!*.*
+!*/
+Playground
 .DS_Store
 .vscode
+a.out
+**/package-lock.json
+.env
+.venv
+__pycache__
+.pytest_cache
+tempCodeRunnerFile.cpp
+tempCodeRunnerFile.py
 
