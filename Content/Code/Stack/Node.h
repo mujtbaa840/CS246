@@ -7,7 +7,7 @@ namespace dsc
     class NodeD
     {
         public:
-            int data;
+            T data;
             NodeD<T>* next;
             NodeD<T>* prev;
             NodeD(int value) // : data(value), next(nullptr), prev(nullptr) {}
