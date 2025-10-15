@@ -199,6 +199,7 @@ namespace dsc
                 size--;
                 return value;
             }
+            
             int peek() const
             {
                 if (isEmpty())
@@ -208,10 +209,6 @@ namespace dsc
                 return top->data;
             }
 
-            int getSize() const
-            {
-                return size;
-            }
     };
 }
 

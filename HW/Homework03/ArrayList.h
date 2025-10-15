@@ -27,6 +27,22 @@ namespace dshw
             }
 
         public:
+            T* begin()
+            {
+                return arr;
+            }
+            T* end()
+            {
+                return arr + size;
+            }
+            const T* begin() const
+            {
+                return arr;
+            }
+            const T* end() const
+            {
+                return arr + size;
+            }
             ArrayList() : capacity(10), size(0)
             {
                 arr = new T[capacity];
