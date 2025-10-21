@@ -6,7 +6,7 @@
 #include "Node.h"
 
 
-namespace dsc
+namespace dshw
 {
     template <class T>
     class StaticQueue
@@ -141,7 +141,7 @@ namespace dsc
     class DynamicQueue
     {
         private:
-            using Node = dsc::NodeD<T>;
+            using Node = NodeD<T>;
             Node* front;
             Node* rear;
             int count;

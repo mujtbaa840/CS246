@@ -1,7 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-namespace dsc
+namespace dshw
 {
     template <class T>
     class NodeD
