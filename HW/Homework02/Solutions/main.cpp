@@ -23,8 +23,8 @@ string toBase(int number, int base = 2)             // T(n): n = number
 }
 /*
     T(n) = c1 + c3 + c4 + c5(floor(log_base(n)) + 2) + c6(floor(log_base(n)) + 1) + c7(floor(log_base(n)) + 1) + c8
-         = (c5 + c6 + c7)floor(log_base(n)) + (c1 + c3 + c4 + 2c5 + c6 + c8)
-         = 3log_base(n) + 7
+         = (c5 + c6 + c7)floor(log_base(n)) + (c1 + c3 + c4 + 2c5 + c6 + c7 + c8)
+         = 3log_base(n) + 8
     O(log(n))
 */
 
