@@ -112,7 +112,7 @@ bool contains(Node<int>* node, int target)
 
 void printBinaries(int num, const string& b = "")
 {
-    if (b.length() == num)           // 1
+    if (b.length() >= num)           // 1
     {
         cout << b << endl;           // 0
         return;
