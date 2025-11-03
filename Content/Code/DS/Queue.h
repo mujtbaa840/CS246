@@ -2,57 +2,82 @@
 #define QUEUE_H
 
 #include <iostream>
-#include <string>
 #include <stdexcept>
 #include "Node.h"
 
-using namespace std;
+
 namespace dsc
 {
+    template <class T>
     class StaticQueue
     {
         private:
-            int* arr;
-            int capacity;
+            T* arr;
+            size_t capacity;
             int front;
             int rear;
-            int count;
+            size_t count;
+
+            void swap(StaticQueue& other) noexcept
+            {
+                std::swap(arr, other.arr);
+                std::swap(capacity, other.capacity);
+                std::swap(front, other.front);
+                std::swap(rear, other.rear);
+                std::swap(count, other.count);
+            }
 
         public:
-            StaticQueue() : capacity(10), front(0), rear(-1), count(0)
-            {
-                arr = new int[capacity];
-            }
+            StaticQueue() : StaticQueue(100) {}
             StaticQueue(int cap) : capacity(cap), front(0), rear(-1), count(0)
             {
                 if (cap <= 0)
                 {
-                    throw invalid_argument("Size must be greater than 0");
+                    throw std::invalid_argument("Size must be greater than 0");
                 }
-                arr = new int[capacity];
+                arr = new T[capacity];
             }
-            StaticQueue(const StaticQueue& obj) : capacity(obj.capacity), front(obj.front), rear(obj.rear), count(obj.count)
+            StaticQueue(const StaticQueue<T>& obj) : capacity(obj.capacity), front(obj.front), rear(obj.rear), count(obj.count)
             {
-                arr = new int[capacity];
+                arr = new T[capacity];
                 for (int i = 0; i < capacity; ++i)
                 {
                     arr[i] = obj.arr[i];
                 }
             }
-            StaticQueue& operator=(const StaticQueue& rhs)
+            StaticQueue& operator=(const StaticQueue<T>& rhs)
+            {
+                if (this != &rhs)
+                {
+                    StaticQueue temp(rhs);
+                    swap(temp);
+                }
+                return *this;
+            }
+
+            StaticQueue(StaticQueue<T>&& obj) noexcept : arr(obj.arr), capacity(obj.capacity), front(obj.front), rear(obj.rear), count(obj.count)
+            {
+                obj.arr = nullptr;
+                obj.capacity = 0;
+                obj.front = 0;
+                obj.rear = -1;
+                obj.count = 0;
+            }
+            StaticQueue<T>& operator=(StaticQueue<T>&& rhs) noexcept
             {
                 if (this != &rhs)
                 {
                     delete[] arr;
+                    arr = rhs.arr;
                     capacity = rhs.capacity;
                     front = rhs.front;
                     rear = rhs.rear;
                     count = rhs.count;
-                    arr = new int[capacity];
-                    for (int i = 0; i < capacity; ++i)
-                    {
-                        arr[i] = rhs.arr[i];
-                    }
+                    rhs.arr = nullptr;
+                    rhs.capacity = 0;
+                    rhs.front = 0;
+                    rhs.rear = -1;
+                    rhs.count = 0;
                 }
                 return *this;
             }
@@ -62,34 +87,34 @@ namespace dsc
                 delete[] arr;
             }
 
-            void enqueue(int value)
+            void enqueue(const T& value)
             {
                 if (count == capacity)
                 {
-                    throw overflow_error("Queue is full");
+                    throw std::overflow_error("Queue is full");
                 }
                 rear = (rear + 1) % capacity;
                 arr[rear] = value;
                 count++;
             }
 
-            int dequeue()
+            T dequeue()
             {
                 if (count == 0)
                 {
-                    throw underflow_error("Queue is empty");
+                    throw std::underflow_error("Queue is empty");
                 }
-                int value = arr[front];
+                T value = arr[front];
                 front = (front + 1) % capacity;
                 count--;
                 return value;
             }
 
-            int peek() const
+            const T& peek() const
             {
                 if (count == 0)
                 {
-                    throw underflow_error("Queue is empty");
+                    throw std::underflow_error("Queue is empty");
                 }
                 return arr[front];
             }
@@ -104,57 +129,82 @@ namespace dsc
                 return count == capacity;
             }
 
-            int size() const
+            size_t size() const
             {
                 return count;
             }
 
             
     };
+
+    template <class T>
     class DynamicQueue
     {
         private:
-            using Node = dsc::NodeD<int>;
+            using Node = NodeD<T>;
             Node* front;
             Node* rear;
-            int size;
+            int count;
+
+            void swap(DynamicQueue& other) noexcept
+            {
+                std::swap(front, other.front);
+                std::swap(rear, other.rear);
+                std::swap(count, other.count);
+            }
+
         public:
-            DynamicQueue() : front(nullptr), rear(nullptr), size(0) {}
-            DynamicQueue(int value) : front(new Node(value)), rear(front), size(1) {}
-            DynamicQueue(const DynamicQueue& obj) : front(nullptr), rear(nullptr), size(0)
+            DynamicQueue() : front(nullptr), rear(nullptr), count(0) {}
+            DynamicQueue(const DynamicQueue<T>& obj) : front(nullptr), rear(nullptr), count(0)
             {
                 Node* current = obj.front;
                 while (current != nullptr)
                 {
-                    this->enqueue(current->data);
+                    enqueue(current->data);
                     current = current->next;
                 }
             }
-            DynamicQueue& operator=(const DynamicQueue& rhs)
+            DynamicQueue<T>& operator=(const DynamicQueue<T>& rhs)
             {
                 if (this != &rhs)
                 {
-                    this->~DynamicQueue();
-                    front = nullptr;
-                    rear = nullptr;
-                    size = 0;
-                    Node* current = rhs.front;
-                    while (current != nullptr)
-                    {
-                        this->enqueue(current->data);
-                        current = current->next;
-                    }
+                    DynamicQueue temp(rhs);
+                    swap(temp);
+                }
+                return *this;
+            }
+            DynamicQueue(DynamicQueue<T>&& obj) noexcept : front(obj.front), rear(obj.rear), count(obj.count)
+            {
+                obj.front = nullptr;
+                obj.rear = nullptr;
+                obj.count = 0;
+            }
+            DynamicQueue<T>& operator=(DynamicQueue<T>&& rhs) noexcept
+            {
+                if (this != &rhs)
+                {
+                    clear();
+                    front = rhs.front;
+                    rear = rhs.rear;
+                    count = rhs.count;
+                    rhs.front = nullptr;
+                    rhs.rear = nullptr;
+                    rhs.count = 0;
                 }
                 return *this;
             }
             ~DynamicQueue()
+            {
+                clear();
+            }
+            void clear()
             {
                 while (!isEmpty())
                 {
                     dequeue();
                 }
             }
-            void enqueue(int value)
+            void enqueue(const T& value)
             {
                 Node* newNode = new Node(value);
                 if (rear == nullptr)
@@ -167,16 +217,16 @@ namespace dsc
                     newNode->prev = rear;
                     rear = newNode;
                 }
-                size++;
+                count++;
             }
-            int dequeue()
+            T dequeue()
             {
                 if (isEmpty())
                 {
-                    throw underflow_error("Queue is empty");
+                    throw std::underflow_error("Queue is empty");
                 }
                 Node* temp = front;
-                int value = front->data;
+                T value = front->data;
                 front = front->next;
                 if (front != nullptr)
                 {
@@ -187,24 +237,24 @@ namespace dsc
                     rear = nullptr;
                 }
                 delete temp;
-                size--;
+                count--;
                 return value;
             }
-            int peek() const
+            const T& peek() const
             {
                 if (isEmpty())
                 {
-                    throw underflow_error("Queue is empty");
+                    throw std::underflow_error("Queue is empty");
                 }
                 return front->data;
             }
             bool isEmpty() const
             {
-                return size == 0;
+                return count == 0;
             }
-            int getSize() const
+            size_t size() const
             {
-                return size;
+                return count;
             }
     };
 }

@@ -8,111 +8,127 @@ using namespace std;
 
 namespace dsc
 {
+    template <class T>
     class StaticStack
     {
         private:
-            int* arr;
+            T* arr;
             int capacity;
-            int top;
+            int count;
 
         public:
-            StaticStack() : capacity(10), top(-1)
+            StaticStack() : StaticStack(100) {}
+            StaticStack(int size) : capacity(size), count(0)
             {
-                arr = new int[capacity];
-            }
-            StaticStack(int cap) : capacity(cap), top(-1)
-            {
-                if (cap <= 0)
+                if (size <= 0)
                 {
-                    throw invalid_argument("Size must be greater than 0");
+                    throw invalid_argument("Size must be positive.");
                 }
-                arr = new int[capacity];
+                arr = new T[size];
             }
-            StaticStack(const StaticStack& obj) : capacity(obj.capacity), top(obj.top)
+            StaticStack(const StaticStack<T>& obj) : capacity(obj.capacity), count(obj.count)
             {
-                arr = new int[capacity];
-                for (int i = 0; i <= top; ++i)
+                arr = new T[capacity];
+                for (int i = 0; i < count; i++)
                 {
                     arr[i] = obj.arr[i];
                 }
             }
-            StaticStack& operator=(const StaticStack& rhs)
+
+            StaticStack<T>& operator=(const StaticStack<T>& rhs)
             {
                 if (this != &rhs)
                 {
                     delete[] arr;
                     capacity = rhs.capacity;
-                    top = rhs.top;
-                    arr = new int[capacity];
-                    for (int i = 0; i <= top; ++i)
+                    count = rhs.count;
+                    arr = new T[capacity];
+                    for (int i = 0; i < count; i++)
                     {
                         arr[i] = rhs.arr[i];
                     }
                 }
                 return *this;
             }
-
+            StaticStack(StaticStack<T>&& obj) noexcept : arr(obj.arr), capacity(obj.capacity), count(obj.count)
+            {
+                obj.arr = nullptr;
+                obj.capacity = 0;
+                obj.count = 0;
+            }
+            StaticStack<T>& operator=(StaticStack<T>&& rhs) noexcept
+            {
+                if (this != &rhs)
+                {
+                    delete[] arr;
+                    arr = rhs.arr;
+                    capacity = rhs.capacity;
+                    count = rhs.count;
+                    rhs.arr = nullptr;
+                    rhs.capacity = 0;
+                    rhs.count = 0;
+                }
+                return *this;
+            }
             ~StaticStack()
             {
                 delete[] arr;
             }
-
-            void push(int value)
+            void push(const T& value)
             {
-                if (top == capacity - 1)
+                if (count == capacity)
                 {
-                    throw overflow_error("Stack overflow");
+                    throw overflow_error("Stack overflow. Cannot push to full stack.");
                 }
-                arr[++top] = value;
+                arr[count++] = value;
             }
-
-            int pop()
+            T pop()
             {
                 if (isEmpty())
                 {
-                    throw underflow_error("Stack is empty");
+                    throw runtime_error("Stack is empty. Cannot pop.");
                 }
-                return arr[top--];
+                return arr[--count];
             }
-
-            int peek() const
+            T peek() const
             {
                 if (isEmpty())
                 {
-                    throw underflow_error("Stack is empty");
+                    throw runtime_error("Stack is empty. Cannot peek.");
                 }
-                return arr[top];
+                return arr[count - 1];
             }
-
             bool isEmpty() const
             {
-                return top == -1;
+                return count == 0;
             }
-
-            int getSize() const
+            int size() const
             {
-                return top + 1;
+                return count;
             }
     };
 
+    template <class T>
     class DynamicStack
     {
         private:
-            using Node = dsc::NodeD<int>;
-            Node* top;
-            int size;
+            NodeD<T>* top;
+            int count;
 
         public:
-            DynamicStack() : top(nullptr), size(0) {}
-            DynamicStack(int value) : top(new Node(value)), size(1) {}
-            DynamicStack(const DynamicStack& obj) : top(nullptr), size(0)
+            DynamicStack() : top(nullptr), count(0) {}
+            DynamicStack(const DynamicStack<T>& obj) : top(nullptr), count(0)
             {
-                Node* current = obj.top;
-                Node* prevNode = nullptr;
+                if (obj.top == nullptr)
+                {
+                    return;
+                }
+                NodeD<T>* current = obj.top;
+                NodeD<T>* prevNode = nullptr;
                 while (current != nullptr)
                 {
-                    Node* newNode = new Node(current->data);
-                    if (top == nullptr)
+                    NodeD<T>* newNode = new NodeD<T>(current->data);
+                    if (prevNode == nullptr)
                     {
                         top = newNode;
                     }
@@ -123,22 +139,27 @@ namespace dsc
                     }
                     prevNode = newNode;
                     current = current->next;
+                    count++;
                 }
-                size = obj.size;
             }
-            DynamicStack& operator=(const DynamicStack& rhs)
+            
+            DynamicStack<T>& operator=(const DynamicStack<T>& rhs)
             {
                 if (this != &rhs)
                 {
-                    this->~DynamicStack();
+                    clear();
                     top = nullptr;
-                    size = 0;
-                    Node* current = rhs.top;
-                    Node* prevNode = nullptr;
+                    count = 0;
+                    if (rhs.top == nullptr)
+                    {
+                        return *this;
+                    }
+                    NodeD<T>* current = rhs.top;
+                    NodeD<T>* prevNode = nullptr;
                     while (current != nullptr)
                     {
-                        Node* newNode = new Node(current->data);
-                        if (top == nullptr)
+                        NodeD<T>* newNode = new NodeD<T>(current->data);
+                        if (prevNode == nullptr)
                         {
                             top = newNode;
                         }
@@ -149,66 +170,86 @@ namespace dsc
                         }
                         prevNode = newNode;
                         current = current->next;
+                        count++;
                     }
-                    size = rhs.size;
+                }
+                return *this;
+            }
+            DynamicStack(DynamicStack<T>&& obj) noexcept : top(obj.top), count(obj.count)
+            {
+                obj.top = nullptr;
+                obj.count = 0;
+            }
+            DynamicStack<T>& operator=(DynamicStack<T>&& rhs) noexcept
+            {
+                if (this != &rhs)
+                {
+                    clear();
+                    top = rhs.top;
+                    count = rhs.count;
+                    rhs.top = nullptr;
+                    rhs.count = 0;
                 }
                 return *this;
             }
 
             ~DynamicStack()
             {
+                clear();
+            }
+
+            void clear()
+            {
                 while (!isEmpty())
                 {
                     pop();
                 }
             }
-            bool isEmpty() const
+
+            void push(const T& value)
             {
-                return size == 0;
-            }
-            int getSize() const
-            {
-                return size;
-            }
-            void push(int value)
-            {
-                Node* newNode = new Node(value);
+                NodeD<T>* newNode = new NodeD<T>(value);
                 newNode->next = top;
                 if (top != nullptr)
                 {
                     top->prev = newNode;
                 }
                 top = newNode;
-                size++;
+                count++;
             }
-
-            int pop()
+            T pop()
             {
                 if (isEmpty())
                 {
-                    throw underflow_error("Stack is empty");
+                    throw runtime_error("Stack is empty. Cannot pop.");
                 }
-                Node* temp = top;
-                int value = top->data;
+                NodeD<T>* temp = top;
+                T value = top->data;
                 top = top->next;
                 if (top != nullptr)
                 {
                     top->prev = nullptr;
                 }
                 delete temp;
-                size--;
+                count--;
                 return value;
             }
-            
-            int peek() const
+            const T& peek() const
             {
                 if (isEmpty())
                 {
-                    throw underflow_error("Stack is empty");
+                    throw runtime_error("Stack is empty. Cannot peek.");
                 }
                 return top->data;
             }
-
+            bool isEmpty() const
+            {
+                return top == nullptr;
+            }
+            int size() const
+            {
+                return count;
+            }
     };
 }
 

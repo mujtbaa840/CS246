@@ -1,72 +1,94 @@
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
-#include <iostream>
-#include <string>
-#include <sstream>
 #include "Node.h"
 #include "Object.h"
+#include <sstream>
 
-using namespace std;
-using Node = dsc::NodeD<int>;
+template <class T>
+using Node = dsc::NodeD<T>;
 
 namespace dsc
 {
+    template <class T>
     class LinkedList : public Object
     {
         private:
-            Node* head;
-            Node* tail;
-            size_t size;
+            Node<T>* head;
+            Node<T>* tail;
+            size_t count;
+
+            void clear()
+            {
+                Node<T>* current = head;
+                while (current != nullptr)
+                {
+                    Node<T>* nextNode = current->next;
+                    delete current;
+                    current = nextNode;
+                }
+                head = nullptr;
+                tail = nullptr;
+                count = 0;
+            }
 
         public:
-            LinkedList() : head(nullptr), tail(nullptr), size(0) {}
-            LinkedList(const LinkedList& obj) : head(nullptr), tail(nullptr), size(0)
+            LinkedList() : head(nullptr), tail(nullptr), count(0) {}
+            LinkedList(const LinkedList<T>& obj) : head(nullptr), tail(nullptr), count(0)
             {
-                Node* current = obj.head;
+                Node<T>* current = obj.head;
                 while (current != nullptr)
                 {
                     this->insert(current->data);
                     current = current->next;
                 }
             }
-            LinkedList& operator=(const LinkedList& rhs)
+            LinkedList(LinkedList<T>&& obj) noexcept : head(obj.head), tail(obj.tail), count(obj.count)
+            {
+                obj.head = nullptr;
+                obj.tail = nullptr;
+                obj.count = 0;
+            }
+
+            LinkedList<T>& operator=(const LinkedList<T>& rhs)
             {
                 if (this != &rhs)
                 {
-                    this->~LinkedList(); 
-                    head = nullptr;
-                    tail = nullptr;
-                    size = 0;
-                    Node* current = rhs.head;
+                    clear();
+                    Node<T>* current = rhs.head;
                     while (current != nullptr)
                     {
-                        this->insert(current->data);
+                        insert(current->data);
                         current = current->next;
                     }
                 }
                 return *this;
             }
-            ~LinkedList() override
+            LinkedList<T>& operator=(LinkedList<T>&& rhs) noexcept
             {
-                Node* current = head;
-                while (current != nullptr)
+                if (this != &rhs)
                 {
-                    Node* nextNode = current->next;
-                    delete current;
-                    current = nextNode;
+                    clear();
+                    head = rhs.head;
+                    tail = rhs.tail;
+                    count = rhs.count;
+                    rhs.head = nullptr;
+                    rhs.tail = nullptr;
+                    rhs.count = 0;
                 }
-                head = nullptr;
-                tail = nullptr;
+                return *this;
             }
 
-            void insert(int value)
+            ~LinkedList() override
             {
-                Node* newNode = new Node(value);
-                if (head == nullptr)
+                clear();
+            }
+            void insert(const T& value)
+            {
+                Node<T>* newNode = new Node<T>(value);
+                if (tail == nullptr)
                 {
-                    head = newNode;
-                    tail = newNode;
+                    head = tail = newNode;
                 }
                 else
                 {
@@ -74,31 +96,64 @@ namespace dsc
                     newNode->prev = tail;
                     tail = newNode;
                 }
-                size++;
+                count++;
             }
-            void insertFront(int value)
+
+            void insertFront(const T& value)
             {
-                Node* newNode = new Node(value);
-                newNode->next = head;
-                if (head != nullptr)
+                Node<T>* newNode = new Node<T>(value);
+                if (head == nullptr)
                 {
+                    head = tail = newNode;
+                }
+                else
+                {
+                    newNode->next = head;
                     head->prev = newNode;
+                    head = newNode;
                 }
-                head = newNode;
-                if (tail == nullptr)
-                {
-                    tail = newNode;
-                }
-                size++;
+                count++;
             }
-            int pop()
+
+            void remove(const T& value)
+            {
+                Node<T>* current = head;
+                while (current != nullptr)
+                {
+                    if (current->data == value)
+                    {
+                        if (current->prev != nullptr)
+                        {
+                            current->prev->next = current->next;
+                        }
+                        else
+                        {
+                            head = current->next;
+                        }
+                        if (current->next != nullptr)
+                        {
+                            current->next->prev = current->prev;
+                        }
+                        else
+                        {
+                            tail = current->prev;
+                        }
+                        delete current;
+                        count--;
+                        return;
+                    }
+                    current = current->next;
+                }
+            }
+
+            T& pop()
             {
                 if (tail == nullptr)
                 {
-                    throw out_of_range("List is empty");
+                    throw runtime_error("List is empty");
                 }
-                Node* temp = tail;
-                int value = tail->data;
+                Node<T>* temp = tail;
+                T value = tail->data;
                 tail = tail->prev;
                 if (tail != nullptr)
                 {
@@ -109,18 +164,18 @@ namespace dsc
                     head = nullptr;
                 }
                 delete temp;
-                size--;
+                count--;
                 return value;
             }
 
-            int popFront()
+            T& popFront()
             {
                 if (head == nullptr)
                 {
-                    throw out_of_range("List is empty");
+                    throw runtime_error("List is empty");
                 }
-                Node* temp = head;
-                int value = head->data;
+                Node<T>* temp = head;
+                T value = head->data;
                 head = head->next;
                 if (head != nullptr)
                 {
@@ -131,47 +186,13 @@ namespace dsc
                     tail = nullptr;
                 }
                 delete temp;
-                size--;
+                count--;
                 return value;
             }
-            int remove(int value)
+
+            bool contains(const T& value) const
             {
-                if (head == nullptr)
-                {
-                    throw out_of_range("List is empty");
-                }
-                Node* current = head;
-                while (current != nullptr && current->data != value)
-                {
-                    current = current->next;
-                }
-                if (current == nullptr)
-                {
-                    throw invalid_argument("Value not found in the list");
-                }
-                if (current->prev != nullptr)
-                {
-                    current->prev->next = current->next;
-                }
-                else
-                {
-                    head = current->next;
-                }
-                if (current->next != nullptr)
-                {
-                    current->next->prev = current->prev;
-                }
-                else
-                {
-                    tail = current->prev;
-                }
-                delete current;
-                size--;
-                return value;
-            }
-            bool contains(int value) const
-            {
-                Node* current = head;
+                Node<T>* current = head;
                 while (current != nullptr)
                 {
                     if (current->data == value)
@@ -182,16 +203,17 @@ namespace dsc
                 }
                 return false;
             }
-            size_t getSize() const
+
+            size_t size() const
             {
-                return size;
+                return count;
             }
-            
+
             string toString() const override
             {
                 stringstream out;
                 out << "[";
-                Node* current = head;
+                Node<T>* current = head;
                 while (current != nullptr)
                 {
                     out << current->data;
@@ -202,26 +224,55 @@ namespace dsc
                     current = current->next;
                 }
                 out << "]";
-                return out.str();
+                return out.str();    
             }
 
-            void reverse()
+            class const_iterator
             {
-                Node* prev = nullptr;
-                Node* current = head;
-                Node* next = nullptr;
-                while (current != nullptr)
-                {
-                    next = current->next;
-                    current->next = prev;
-                    current->prev = next;
-                    prev = current;
-                    current = next;
-                }
-                tail = head;
-                head = prev;
+                private:
+                    Node<T>* current;
+                public:
+                    const_iterator(Node<T>* start) : current(start) {}
+                    const T& operator*() const
+                    {
+                        return current->data;
+                    }
+                    const_iterator& operator++()
+                    {
+                        if (current != nullptr)
+                        {
+                            current = current->next;
+                        }
+                        return *this;
+                    }
+                    const_iterator operator++(int)
+                    {
+                        const_iterator temp = *this;
+                        ++(*this);
+                        return temp;
+                    }
+                    bool operator==(const const_iterator& other) const
+                    {
+                        return current == other.current;
+                    }
+                    bool operator!=(const const_iterator& other) const
+                    {
+                        return current != other.current;
+                    }
+            };
+
+            const_iterator begin() const
+            {
+                return const_iterator(head);
             }
-    };        
+            const_iterator end() const
+            {
+                return const_iterator(nullptr);
+            }
+  
+    };
 }
+
+
 
 #endif

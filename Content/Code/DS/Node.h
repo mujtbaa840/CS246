@@ -4,13 +4,26 @@
 namespace dsc
 {
     template <class T>
+    class NodeS
+    {
+        public:
+            T data;
+            NodeS<T>* next;
+            NodeS(const T& value) // : data(value), next(nullptr) {}
+            {
+                data = value;
+                next = nullptr;
+            }
+    };
+
+    template <class T>
     class NodeD
     {
         public:
             T data;
             NodeD<T>* next;
             NodeD<T>* prev;
-            NodeD(int value) // : data(value), next(nullptr), prev(nullptr) {}
+            NodeD(const T& value) // : data(value), next(nullptr), prev(nullptr) {}
             {
                 data = value;
                 next = nullptr;

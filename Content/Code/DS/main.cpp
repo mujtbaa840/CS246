@@ -1,52 +1,39 @@
 #include <iostream>
 #include <vector>
-#include "Stack.h"
+#include "Set.h"
+
 
 using namespace std;
 using namespace dsc;
 
-int binarySearch(const vector<int>& arr, int target)
-{
-    int left = 0;
-    int right = arr.size() -1;
-    int count = 0;
-
-    while (left <= right)
-    {
-        count++;
-        // int middle = (left + right) / 2;
-        int middle = left + (right - left) / 2;
-        
-        if (arr[middle] == target)
-        {
-            cout << "Count: " << count << endl;
-            return middle;
-        }
-        if (arr[middle] < target)
-        {
-            left = middle + 1;
-        }
-        else // if (arr[middle] > target)
-        {
-            right = middle - 1;
-        }
-    }
-    cout << "Count: " << count << endl;
-    return -1;
-}
+template <typename T>
+// using Set = SetOpen<T>;
+using Set = SetChain<T>;
 
 int main()
 {
-    vector<int> arr;
+    Set<int> mySet;
+    mySet.insert(10);
+    mySet.insert(20);
+    mySet.insert(30);
+    mySet.insert(40);
+    mySet.insert(50);
+    mySet.insert(110); // Collides with 10 in hash table
+    mySet.insert(20); // Duplicate, should not be added
+    cout << "Set contents: " << mySet << endl;
+    mySet.remove(30);
+    cout << "After removing 30, set contents: " << mySet << endl;
+    cout << "Set contains 20: " << (mySet.contains(20) ? "Yes" : "No") << endl;
+    cout << "Set contains 30: " << (mySet.contains(30) ? "Yes" : "No") << endl;
+    
+    Set<string> names;
+    names.insert("Alice");
+    names.insert("Bob");
+    names.insert("Charlotte");
+    names.insert("Daniel");
+    names.insert("Alice"); // Duplicate, should not be added
+    names.insert("Bob");   // Duplicate, should not be added
+    cout << "Names set: " << names << endl;
 
-    for (int i = 0; i < 1000000; ++i)
-    {
-        arr.push_back(i * 2 + 3);
-    }
-
-    int index = binarySearch(arr, 457);
-    cout << "Found at index " << index << ".\n";
-
-    cout << static_cast<size_t>(-1) << endl;
     return 0;
 }
