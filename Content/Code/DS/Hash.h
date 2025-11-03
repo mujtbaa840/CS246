@@ -28,6 +28,16 @@ namespace dsc
     };
 
     template <>
+    class Hash<char>
+    {
+        public:
+            size_t operator()(const char& key) const
+            {
+                return static_cast<size_t>(key);
+            }
+    };
+
+    template <>
     class Hash<std::string>
     {
         public:

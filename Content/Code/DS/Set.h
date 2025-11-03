@@ -19,7 +19,7 @@ namespace dsc
             size_t capacity;
             size_t count;
             Hash<T> hashFunc;
-            static const size_t INITIAL_CAPACITY = 100;
+            static const size_t INITIAL_CAPACITY;
 
             void clear()
             {
@@ -52,6 +52,7 @@ namespace dsc
                             index = (index + 1) % newCapacity;
                         }
                         newArr[index] = arr[i];
+                        delete arr[i];
                         arr[i] = nullptr;
                     }
                 }
