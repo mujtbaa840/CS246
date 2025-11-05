@@ -194,6 +194,33 @@ namespace dsc
             {
                 return count;
             }
+
+            bool isEmpty() const
+            {
+                return count == 0;
+            }
+
+            bool operator==(const SetOpen<T>& other) const
+            {
+                if (count != other.count)
+                {
+                    return false;
+                }
+                for (size_t i = 0; i < capacity; ++i)
+                {
+                    if (arr[i] != nullptr && !other.contains(*arr[i]))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            bool operator!=(const SetOpen<T>& other) const
+            {
+                return !(*this == other);
+            }
+
             std::string toString() const override
             {
                 std::stringstream out;
@@ -408,6 +435,31 @@ namespace dsc
                 {
                     return count;
                 }
+
+                bool isEmpty() const
+                {
+                    return count == 0;
+                }
+
+                bool operator==(const SetChain<T>& other) const
+                {
+                    if (count != other.count)
+                    {
+                        return false;
+                    }
+                    for (size_t i = 0; i < capacity; ++i)
+                    {
+                        for (const T& value : arr[i])
+                        {
+                            if (!other.contains(value))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+
                 std::string toString() const override
                 {
                     std::stringstream out;

@@ -1,5 +1,8 @@
 #include <iostream>
 #include <vector>
+#include <string>
+#include <cstdlib>
+#include <ctime>
 #include "Set.h"
 
 
@@ -10,8 +13,32 @@ template <typename T>
 // using Set = SetOpen<T>;
 using Set = SetChain<T>;
 
+template <typename T>
+bool anyDuplicates(const vector<T>& arr)
+{
+    
+}
+
+bool uniqueString(const string& str)
+{
+    
+}   
+
+template <typename T>
+bool twoSum(const vector<T>& arr, T target)
+{
+    
+}
+
+bool isAnagram(const string& str1, const string& str2)
+{
+    
+}
+
 int main()
 {
+    // srand(time(0));
+    srand(123);
     Set<int> mySet;
     mySet.insert(10);
     mySet.insert(20);
@@ -35,5 +62,15 @@ int main()
     names.insert("Bob");   // Duplicate, should not be added
     cout << "Names set: " << names << endl;
 
+    // find duplicates in an array using Set
+    const size_t SIZE = 20;
+    vector<int> data(SIZE);
+    for (int &val : data)
+    {
+        val = rand() % 50 + 1; 
+        cout << val << " ";
+    }
+    cout << endl;
+    
     return 0;
 }
