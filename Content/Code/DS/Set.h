@@ -41,7 +41,6 @@ namespace dsc
             {
                 size_t newCapacity = capacity * 2;
                 T** newArr = new T*[newCapacity]{nullptr};
-
                 for (size_t i = 0; i < capacity; ++i)
                 {
                     if (arr[i] != nullptr)
@@ -52,7 +51,6 @@ namespace dsc
                             index = (index + 1) % newCapacity;
                         }
                         newArr[index] = arr[i];
-                        arr[i] = nullptr;
                     }
                 }
                 delete[] arr;
