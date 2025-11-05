@@ -52,7 +52,6 @@ namespace dsc
                             index = (index + 1) % newCapacity;
                         }
                         newArr[index] = arr[i];
-                        delete arr[i];
                         arr[i] = nullptr;
                     }
                 }
@@ -297,7 +296,8 @@ namespace dsc
                 return const_iterator(arr, capacity, capacity);
             }
     };
-    const size_t INITIAL_CAPACITY = 100;
+    template <class T>
+    const size_t SetOpen<T>::INITIAL_CAPACITY = 100;
 
     template <class T>
     class SetChain : public Object
@@ -306,7 +306,6 @@ namespace dsc
                 LinkedList<T>* arr;
                 size_t capacity;
                 size_t count;
-                size_t arrSize;
                 Hash<T> hashFunc;
                 static const size_t INITIAL_CAPACITY;
 
@@ -329,7 +328,7 @@ namespace dsc
                 }
             public:
                 SetChain() : SetChain(INITIAL_CAPACITY) {}
-                SetChain(size_t cap) : capacity(cap), count(0), arrSize(0)
+                SetChain(size_t cap) : capacity(cap), count(0)
                 {
                     if (capacity == 0)
                     {
@@ -344,7 +343,7 @@ namespace dsc
                         insert(value);
                     }
                 }
-                SetChain(const SetChain<T>& obj) : capacity(obj.capacity), count(obj.count), arrSize(obj.arrSize)
+                SetChain(const SetChain<T>& obj) : capacity(obj.capacity), count(obj.count)
                 {
                     arr = new LinkedList<T>[capacity];
                     for (size_t i = 0; i < capacity; ++i)
@@ -352,12 +351,11 @@ namespace dsc
                         arr[i] = obj.arr[i];
                     }
                 }
-                SetChain(SetChain<T>&& obj) noexcept : arr(obj.arr), capacity(obj.capacity), count(obj.count), arrSize(obj.arrSize)
+                SetChain(SetChain<T>&& obj) noexcept : arr(obj.arr), capacity(obj.capacity), count(obj.count)
                 {
                     obj.arr = nullptr;
                     obj.capacity = 0;
                     obj.count = 0;
-                    obj.arrSize = 0;
                 }
                 SetChain<T>& operator=(const SetChain<T>& obj)
                 {
@@ -366,7 +364,6 @@ namespace dsc
                         delete[] arr;
                         capacity = obj.capacity;
                         count = obj.count;
-                        arrSize = obj.arrSize;
                         arr = new LinkedList<T>[capacity];
                         for (size_t i = 0; i < capacity; ++i)
                         {
@@ -382,12 +379,10 @@ namespace dsc
                         delete[] arr;
                         capacity = obj.capacity;
                         count = obj.count;
-                        arrSize = obj.arrSize;
                         arr = obj.arr;;
                         obj.arr = nullptr;
                         obj.capacity = 0;
                         obj.count = 0;
-                        obj.arrSize = 0;
                     }
                     return *this;
                 }
@@ -397,7 +392,7 @@ namespace dsc
                 }
                 void insert(const T& value)
                 {
-                    if (arrSize == capacity)
+                    if (count > capacity * 0.7)
                     {
                         resize();
                     }
@@ -405,10 +400,6 @@ namespace dsc
                     if (arr[index].contains(value))
                     {
                         return;
-                    }
-                    if (!arr[index].size())
-                    {
-                        arrSize++;
                     }
                     arr[index].insert(value);
                     count++;
@@ -420,10 +411,6 @@ namespace dsc
                     {
                         arr[index].remove(value);
                         count--;
-                        if (arr[index].size() == 0)
-                        {
-                            arrSize--;
-                        }
                     }
                 }
                 bool contains(const T& value) const
@@ -458,6 +445,11 @@ namespace dsc
                         }
                     }
                     return true;
+                }
+
+                bool operator!=(const SetChain<T>& other) const
+                {
+                    return !(*this == other);
                 }
 
                 std::string toString() const override
