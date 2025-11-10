@@ -20,6 +20,7 @@ namespace dsc
             size_t count;
             Hash<T> hashFunc;
             static const size_t INITIAL_CAPACITY;
+            static const T* DELETED;
 
             void clear()
             {
@@ -158,7 +159,7 @@ namespace dsc
                     if (*arr[index] == value)
                     {
                         delete arr[index];
-                        arr[index] = nullptr;
+                        arr[index] = DELETED;
                         --count;
                         return;
                     }
@@ -298,6 +299,9 @@ namespace dsc
     const size_t SetOpen<T>::INITIAL_CAPACITY = 100;
 
     template <class T>
+    const T* SetOpen<T>::DELETED = nullptr;
+
+    template <class T>
     class SetChain : public Object
     {
             private:
@@ -355,6 +359,7 @@ namespace dsc
                     obj.capacity = 0;
                     obj.count = 0;
                 }
+
                 SetChain<T>& operator=(const SetChain<T>& obj)
                 {
                     if (this != &obj)
@@ -388,6 +393,7 @@ namespace dsc
                 {
                     delete[] arr;
                 }
+                
                 void insert(const T& value)
                 {
                     if (count > capacity * 0.7)

@@ -227,6 +227,55 @@ namespace dsc
                 return out.str();    
             }
 
+            class iterator
+            {
+            private:
+                Node<T>* current;
+            public:
+                iterator(Node<T>* start) : current(start) {}
+
+                T& operator*()
+                {
+                    return current->data;
+                }
+
+                iterator& operator++()
+                {
+                    if (current != nullptr)
+                    {
+                        current = current->next;
+                    }
+                    return *this;
+                }
+
+                iterator operator++(int)
+                {
+                    iterator temp = *this;
+                    ++(*this);
+                    return temp;
+                }
+
+                bool operator==(const iterator& other) const
+                {
+                    return current == other.current;
+                }
+
+                bool operator!=(const iterator& other) const
+                {
+                    return current != other.current;
+                }
+            };
+
+            iterator begin()
+            {
+                return iterator(head);
+            }
+
+            iterator end()
+            {
+                return iterator(nullptr);
+            }
+
             class const_iterator
             {
                 private:
