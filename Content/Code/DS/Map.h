@@ -245,7 +245,7 @@ namespace dsc
                         {
                             out << ", ";
                         }
-                        out << *arr[i];
+                        out << arr[i]->getKey() << ": " << arr[i]->getValue();
                         first = false;
                     }
                 }
@@ -564,9 +564,9 @@ namespace dsc
                     {
                         if (!first)
                         {
-                            out << ",";
+                            out << ", ";
                         }
-                        out << *it;
+                        out << (*it).getKey() << ": " << (*it).getValue();
                         first = false;
                     }
                 }

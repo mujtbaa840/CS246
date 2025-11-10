@@ -37,6 +37,32 @@ bool testMap()
     return true;
 }
 
+bool testMap2()
+{
+    Map<string, int> map;
+    map["apple"] = 1;
+    map["banana"] = 2;
+    map["cherry"] = 3;
+
+    cout << "Map contents: " << map << endl;
+
+    cout << "Key 'banana' maps to value: " << map["banana"] << endl;
+
+    map.remove("banana");
+    cout << "After removing key 'banana', map contents: " << map << endl;
+
+    try
+    {
+        cout << map.get("banana") << endl;
+    }
+    catch (const out_of_range& e)
+    {
+        cout << "Caught exception as expected when accessing removed key 'banana': " << e.what() << endl;
+    }
+
+    return true;
+}
+
 vector<int> twoSum(const vector<int>& nums, int target)
 {
     Map<int, int> map;
@@ -44,14 +70,14 @@ vector<int> twoSum(const vector<int>& nums, int target)
     {
         if (map.contains(target - nums[i]))
         {
-            return {map.get(target - nums[i]), i};
+            return {map[target - nums[i]], i};
         }
-        map.put(nums[i], i);
+        map[nums[i]] = i;
     }
     return {};
 }
 
-// int fibonacci(int n, Map<int, int> memo)
+// int fibonacci(int n, Map<int, int>& memo)
 // {
 
 // }
@@ -60,14 +86,18 @@ vector<int> twoSum(const vector<int>& nums, int target)
 
 int main()
 {
-    // testMap();
+    testMap();
+    cout << endl;
+    testMap2();
+    cout << endl;
 
     vector<int> nums = {10, 5, 3, 7};
-    int target = 14;
+    int target = 17;
 
     vector<int> result = twoSum(nums, target);
 
-    cout << result.size() << endl;
-    
+    cout << "{" << result[0] << ", " << result[1] << "}" << endl;
+
+
     return 0;
 }
