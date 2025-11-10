@@ -17,22 +17,26 @@ namespace dsc
             size_t capacity;
             size_t count;
             static const size_t INITIAL_CAPACITY;
-            static const Pair<K, V>* DELETED;
+            static Pair<K, V>* DELETED;
+            
 
             void clear()
             {
-                for (size_t i = 0; i < capacity; ++i)
+                if (arr != nullptr)
                 {
-                    if (arr[i] != nullptr)
+                    for (size_t i = 0; i < capacity; ++i)
                     {
-                        delete arr[i];
-                        arr[i] = nullptr;
+                        if (arr[i] != nullptr && arr[i] != DELETED)
+                        {
+                            delete arr[i];
+                            arr[i] = nullptr;
+                        }
                     }
+                    delete[] arr;
+                    arr = nullptr;
+                    capacity = 0;
+                    count = 0;
                 }
-                delete[] arr;
-                arr = nullptr;
-                capacity = 0;
-                count = 0;
             }
 
             void resize()
@@ -41,7 +45,7 @@ namespace dsc
                 Pair<K, V>** newArr = new Pair<K, V>*[newCapacity]{nullptr};
                 for (size_t i = 0; i < capacity; ++i)
                 {
-                    if (arr[i] != nullptr)
+                    if (arr[i] != nullptr && arr[i] != DELETED)
                     {
                         size_t index = Hash<K>()(arr[i]->getKey()) % newCapacity;
                         while (newArr[index] != nullptr)
@@ -71,7 +75,15 @@ namespace dsc
                 arr = new Pair<K, V>*[capacity]{nullptr};
                 for (size_t i = 0; i < capacity; ++i)
                 {
-                    if (obj.arr[i] != nullptr)
+                    if (obj.arr[i] == nullptr)
+                    {
+                        arr[i] = nullptr;
+                    }
+                    else if (obj.arr[i] == MapOpen<K, V>::DELETED)
+                    {
+                        arr[i] = MapOpen<K, V>::DELETED;
+                    }
+                    else
                     {
                         arr[i] = new Pair<K, V>(*(obj.arr[i]));
                     }
@@ -93,7 +105,15 @@ namespace dsc
                     arr = new Pair<K, V>*[capacity]{nullptr};
                     for (size_t i = 0; i < capacity; ++i)
                     {
-                        if (obj.arr[i] != nullptr)
+                        if (obj.arr[i] == nullptr)
+                        {
+                            arr[i] = nullptr;
+                        }
+                        else if (obj.arr[i] == MapOpen<K, V>::DELETED)
+                        {
+                            arr[i] = MapOpen<K, V>::DELETED;
+                        }
+                        else
                         {
                             arr[i] = new Pair<K, V>(*(obj.arr[i]));
                         }
@@ -126,15 +146,24 @@ namespace dsc
                 {
                     resize();
                 }
+                size_t firstDeleted = capacity;
                 size_t index = Hash<K>()(key) % capacity;
                 while (arr[index] != nullptr)
                 {
-                    if (arr[index]->getKey() == key)
+                    if (arr[index] != DELETED && arr[index]->getKey() == key)
                     {
                         arr[index]->setValue(value);
                         return;
                     }
+                    if (arr[index] == DELETED && firstDeleted == capacity)
+                    {
+                        firstDeleted = index;
+                    }
                     index = (index + 1) % capacity;
+                }
+                if (firstDeleted != capacity)
+                {
+                    index = firstDeleted;
                 }
                 arr[index] = new Pair<K, V>(key, value);
                 ++count;
@@ -145,7 +174,7 @@ namespace dsc
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
-                    if (arr[index]->getKey() == key)
+                    if (arr[index] != DELETED && arr[index]->getKey() == key)
                     {
                         return arr[index]->getValue();
                     }
@@ -164,7 +193,7 @@ namespace dsc
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
-                    if (arr[index]->getKey() == key)
+                    if (arr[index] != DELETED && arr[index]->getKey() == key)
                     {
                         return arr[index]->getValue();
                     }
@@ -183,7 +212,7 @@ namespace dsc
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
-                    if (arr[index]->getKey() == key)
+                    if (arr[index] != DELETED && arr[index]->getKey() == key)
                     {
                         return true;
                     }
@@ -210,7 +239,7 @@ namespace dsc
                 bool first = true;
                 for (size_t i = 0; i < capacity; ++i)
                 {
-                    if (arr[i] != nullptr)
+                    if (arr[i] != nullptr && arr[i] != DELETED)
                     {
                         if (!first)
                         {
@@ -231,6 +260,10 @@ namespace dsc
 
             V& operator[](const K& key)
             {
+                if (!contains(key))
+                {
+                    put(key, V());
+                }
                 return get(key);
             }
 
@@ -240,9 +273,8 @@ namespace dsc
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
-                    if (arr[index]->getKey() == key)
+                    if (arr[index] != DELETED && arr[index]->getKey() == key)
                     {
-                        delete arr[index];
                         arr[index] = DELETED;
                         --count;
                         return;
@@ -255,13 +287,117 @@ namespace dsc
                 }
                 throw out_of_range("Key not found in Map");
             }
+
+            class iterator
+            {
+                private:
+                    Pair<K, V>** arr;
+                    size_t capacity;
+                    size_t index;
+                    void skipToNext()
+                    {
+                        while (index < capacity && (arr[index] == nullptr || arr[index] == DELETED))
+                        {
+                            ++index;
+                        }
+                    }
+                public:
+                    iterator(Pair<K, V>** array, size_t cap, size_t idx) : arr(array), capacity(cap), index(idx)
+                    {
+                        skipToNext();
+                    }
+                    Pair<K, V>& operator*() const
+                    {
+                        return *arr[index];
+                    }
+                    iterator& operator++()
+                    {
+                        ++index;
+                        skipToNext();
+                        return *this;
+                    }
+                    iterator operator++(int)
+                    {
+                        iterator temp = *this;
+                        ++(*this);
+                        return temp;
+                    }
+                    bool operator==(const iterator& other) const
+                    {
+                        return index == other.index;
+                    }
+                    bool operator!=(const iterator& other) const
+                    {
+                        return index != other.index;
+                    }
+            };
+            iterator begin()
+            {
+                return iterator(arr, capacity, 0);
+            }
+            iterator end()
+            {
+                return iterator(arr, capacity, capacity);
+            }
+
+            class const_iterator
+            {
+                private:
+                    Pair<K, V>** arr;
+                    size_t capacity;
+                    size_t index;
+                    void skipToNext()
+                    {
+                        while (index < capacity && (arr[index] == nullptr || arr[index] == DELETED))
+                        {
+                            ++index;
+                        }
+                    }
+                public:
+                    const_iterator(Pair<K, V>** array, size_t cap, size_t idx) : arr(array), capacity(cap), index(idx)
+                    {
+                        skipToNext();
+                    }
+                    const Pair<K, V>& operator*() const
+                    {
+                        return *arr[index];
+                    }
+                    const_iterator& operator++()
+                    {
+                        ++index;
+                        skipToNext();
+                        return *this;
+                    }
+                    const_iterator operator++(int)
+                    {
+                        const_iterator temp = *this;
+                        ++(*this);
+                        return temp;
+                    }
+                    bool operator==(const const_iterator& other) const
+                    {
+                        return index == other.index;
+                    }
+                    bool operator!=(const const_iterator& other) const
+                    {
+                        return index != other.index;
+                    }
+            };
+            const_iterator begin() const
+            {
+                return const_iterator(arr, capacity, 0);
+            }
+            const_iterator end() const
+            {
+                return const_iterator(arr, capacity, capacity);
+            }
                 
     };
     template <typename K, typename V>
     const size_t MapOpen<K, V>::INITIAL_CAPACITY = 100;
     
     template <typename K, typename V>
-    const Pair<K, V>* MapOpen<K, V>::DELETED = nullptr;
+    Pair<K, V>* MapOpen<K, V>::DELETED = new Pair<K, V>(K(), V());
 
     template <typename K, typename V>
     class MapChain : public Object
@@ -279,6 +415,25 @@ namespace dsc
                 capacity = 0;
                 count = 0;
             }
+
+            void resize()
+            {
+                size_t newCapacity = capacity * 2;
+                LinkedList<Pair<K, V>>* newArr = new LinkedList<Pair<K, V>>[newCapacity];
+
+                for (size_t i = 0; i < capacity; ++i)
+                {
+                    for (const Pair<K, V>& pair : arr[i])
+                    {
+                        size_t index = Hash<K>()(pair.getKey()) % newCapacity;
+                        newArr[index].insert(pair);
+                    }
+                }
+                delete[] arr;
+                arr = newArr;
+                capacity = newCapacity;
+            }
+
         public:
             MapChain() : MapChain(INITIAL_CAPACITY) {}
             MapChain(size_t cap) : capacity(cap), count(0)
@@ -338,6 +493,10 @@ namespace dsc
             }
             void put(const K& key, const V& value)
             {
+                if (count == capacity)
+                {
+                    resize();
+                }
                 size_t index = Hash<K>()(key) % capacity;
                 for (auto& pair : arr[index])
                 {
@@ -420,6 +579,10 @@ namespace dsc
             }
             V& operator[](const K& key)
             {
+                if (!contains(key))
+                {
+                    put(key, V());
+                }
                 return get(key);
             }
             void remove(const K& key)
@@ -435,6 +598,128 @@ namespace dsc
                     }
                 }
                 throw out_of_range("Key not found in MapChain");
+            }
+
+            class iterator
+            {
+                private:
+                    LinkedList<Pair<K, V>>* arr;
+                    size_t capacity;
+                    size_t listIndex;
+                    typename LinkedList<Pair<K, V>>::iterator listIt;
+                    void advanceToNextValid()
+                    {
+                        while (listIndex < capacity && listIt == arr[listIndex].end())
+                        {
+                            ++listIndex;
+                            if (listIndex < capacity)
+                            {
+                                listIt = arr[listIndex].begin();
+                            }
+                        }
+                    }
+                public:
+                    iterator(LinkedList<Pair<K, V>>* array, size_t cap, size_t lIndex) : arr(array), capacity(cap), listIndex(lIndex)
+                    {
+                        if (listIndex < capacity)
+                        {
+                            listIt = arr[listIndex].begin();
+                        }
+                        advanceToNextValid();
+                    }
+                    Pair<K, V>& operator*() const
+                    {
+                        return *listIt;
+                    }
+                    iterator& operator++()
+                    {
+                        ++listIt;
+                        advanceToNextValid();
+                        return *this;
+                    }
+                    iterator operator++(int)
+                    {
+                        iterator temp = *this;
+                        ++(*this);
+                        return temp;
+                    }
+                    bool operator==(const iterator& other) const
+                    {
+                        return listIndex == other.listIndex && listIt == other.listIt;
+                    }
+                    bool operator!=(const iterator& other) const
+                    {
+                        return !(*this == other);
+                    }
+            };
+            iterator begin()
+            {
+                return iterator(arr, capacity, 0);
+            }
+            iterator end()
+            {
+                return iterator(arr, capacity, capacity);
+            }
+
+            class const_iterator
+            {
+                private:
+                    const LinkedList<Pair<K, V>>* arr;
+                    size_t capacity;
+                    size_t listIndex;
+                    typename LinkedList<Pair<K, V>>::const_iterator listIt;
+                    void advanceToNextValid()
+                    {
+                        while (listIndex < capacity && listIt == arr[listIndex].end())
+                        {
+                            ++listIndex;
+                            if (listIndex < capacity)
+                            {
+                                listIt = arr[listIndex].begin();
+                            }
+                        }
+                    }
+                public:
+                    const_iterator(const LinkedList<Pair<K, V>>* array, size_t cap, size_t lIndex) : arr(array), capacity(cap), listIndex(lIndex)
+                    {
+                        if (listIndex < capacity)
+                        {
+                            listIt = arr[listIndex].begin();
+                        }
+                        advanceToNextValid();
+                    }
+                    const Pair<K, V>& operator*() const
+                    {
+                        return *listIt;
+                    }
+                    const_iterator& operator++()
+                    {
+                        ++listIt;
+                        advanceToNextValid();
+                        return *this;
+                    }
+                    const_iterator operator++(int)
+                    {
+                        const_iterator temp = *this;
+                        ++(*this);
+                        return temp;
+                    }
+                    bool operator==(const const_iterator& other) const
+                    {
+                        return listIndex == other.listIndex && listIt == other.listIt;
+                    }
+                    bool operator!=(const const_iterator& other) const
+                    {
+                        return !(*this == other);
+                    }
+                };
+            const_iterator begin() const
+            {
+                return const_iterator(arr, capacity, 0);
+            }
+            const_iterator end() const
+            {
+                return const_iterator(arr, capacity, capacity);
             }
     };
     template <typename K, typename V>

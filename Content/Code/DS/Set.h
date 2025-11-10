@@ -20,13 +20,13 @@ namespace dsc
             size_t count;
             Hash<T> hashFunc;
             static const size_t INITIAL_CAPACITY;
-            static const T* DELETED;
+            static T* DELETED;
 
             void clear()
             {
                 for (size_t i = 0; i < capacity; ++i)
                 {
-                    if (arr[i] != nullptr)
+                    if (arr[i] != nullptr && arr[i] != DELETED)
                     {
                         delete arr[i];
                         arr[i] = nullptr;
@@ -44,7 +44,7 @@ namespace dsc
                 T** newArr = new T*[newCapacity]{nullptr};
                 for (size_t i = 0; i < capacity; ++i)
                 {
-                    if (arr[i] != nullptr)
+                    if (arr[i] != nullptr && arr[i] != DELETED)
                     {
                         size_t index = hashFunc(*arr[i]) % newCapacity;
                         while (newArr[index] != nullptr)
@@ -82,7 +82,15 @@ namespace dsc
                 arr = new T*[capacity]{nullptr};
                 for (size_t i = 0; i < capacity; ++i)
                 {
-                    if (obj.arr[i] != nullptr)
+                    if (obj.arr[i] == nullptr)
+                    {
+                        arr[i] = nullptr;
+                    }
+                    else if (obj.arr[i] == SetOpen<T>::DELETED)
+                    {
+                        arr[i] = SetOpen<T>::DELETED;
+                    }
+                    else
                     {
                         arr[i] = new T(*obj.arr[i]);
                     }
@@ -104,7 +112,15 @@ namespace dsc
                     arr = new T*[capacity]{nullptr};
                     for (size_t i = 0; i < capacity; ++i)
                     {
-                        if (obj.arr[i] != nullptr)
+                        if (obj.arr[i] == nullptr)
+                        {
+                            arr[i] = nullptr;
+                        }
+                        else if (obj.arr[i] == SetOpen<T>::DELETED)
+                        {
+                            arr[i] = SetOpen<T>::DELETED;
+                        }
+                        else
                         {
                             arr[i] = new T(*obj.arr[i]);
                         }
@@ -137,14 +153,23 @@ namespace dsc
                 {
                     resize();
                 }
+                size_t firstDeleted = capacity;
                 size_t index = hashFunc(value) % capacity;
                 while (arr[index] != nullptr)
                 {
-                    if (*arr[index] == value)
+                    if (arr[index] != DELETED && *arr[index] == value)
                     {
                         return;
                     }
+                    if (arr[index] == DELETED && firstDeleted == capacity)
+                    {
+                        firstDeleted = index;
+                    }
                     index = (index + 1) % capacity;
+                }
+                if (firstDeleted != capacity)
+                {
+                    index = firstDeleted;
                 }
                 arr[index] = new T(value);
                 ++count;
@@ -156,7 +181,7 @@ namespace dsc
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
-                    if (*arr[index] == value)
+                    if (arr[index] != DELETED && *arr[index] == value)
                     {
                         delete arr[index];
                         arr[index] = DELETED;
@@ -176,7 +201,7 @@ namespace dsc
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
-                    if (*arr[index] == value)
+                    if (arr[index] != DELETED && *arr[index] == value)
                     {
                         return true;
                     }
@@ -226,7 +251,7 @@ namespace dsc
                 bool first = true;
                 for (size_t i = 0; i < capacity; ++i)
                 {
-                    if (arr[i] != nullptr)
+                    if (arr[i] != nullptr && arr[i] != DELETED)
                     {
                         if (!first)
                         {
@@ -249,7 +274,7 @@ namespace dsc
 
                     void skipToNext()
                     {
-                        while (index < capacity && arr[index] == nullptr)
+                        while (index < capacity && (arr[index] == nullptr || arr[index] == DELETED))
                         {
                             ++index;
                         }
@@ -297,9 +322,9 @@ namespace dsc
     };
     template <class T>
     const size_t SetOpen<T>::INITIAL_CAPACITY = 100;
-
+    
     template <class T>
-    const T* SetOpen<T>::DELETED = nullptr;
+    T* SetOpen<T>::DELETED = new T();
 
     template <class T>
     class SetChain : public Object
@@ -400,6 +425,7 @@ namespace dsc
                     {
                         resize();
                     }
+                    
                     size_t index = hashFunc(value) % capacity;
                     if (arr[index].contains(value))
                     {
