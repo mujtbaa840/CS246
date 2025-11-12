@@ -16,6 +16,7 @@ namespace dsc
             Pair<K, V>** arr;
             size_t capacity;
             size_t count;
+            Hash<K> hashFunc;
             static const size_t INITIAL_CAPACITY;
             static Pair<K, V>* DELETED;
             
@@ -47,7 +48,7 @@ namespace dsc
                 {
                     if (arr[i] != nullptr && arr[i] != DELETED)
                     {
-                        size_t index = Hash<K>()(arr[i]->getKey()) % newCapacity;
+                        size_t index = hashFunc(arr[i]->getKey()) % newCapacity;
                         while (newArr[index] != nullptr)
                         {
                             index = (index + 1) % newCapacity;
@@ -147,7 +148,7 @@ namespace dsc
                     resize();
                 }
                 size_t firstDeleted = capacity;
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 while (arr[index] != nullptr)
                 {
                     if (arr[index] != DELETED && arr[index]->getKey() == key)
@@ -170,7 +171,7 @@ namespace dsc
             }
             const V& get(const K& key) const
             {
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
@@ -189,7 +190,7 @@ namespace dsc
 
             V& get(const K& key)
             {
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
@@ -208,7 +209,7 @@ namespace dsc
 
             bool contains(const K& key) const
             {   
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
@@ -269,7 +270,7 @@ namespace dsc
 
             void remove(const K& key)
             {
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 size_t startIndex = index;
                 while (arr[index] != nullptr)
                 {
@@ -431,6 +432,7 @@ namespace dsc
             LinkedList<Pair<K, V>>* arr;
             size_t capacity;
             size_t count;
+            Hash<K> hashFunc;
             static const size_t INITIAL_CAPACITY;
 
             void clear()
@@ -450,7 +452,7 @@ namespace dsc
                 {
                     for (const Pair<K, V>& pair : arr[i])
                     {
-                        size_t index = Hash<K>()(pair.getKey()) % newCapacity;
+                        size_t index = hashFunc(pair.getKey()) % newCapacity;
                         newArr[index].insert(pair);
                     }
                 }
@@ -522,7 +524,7 @@ namespace dsc
                 {
                     resize();
                 }
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 for (auto& pair : arr[index])
                 {
                     if (pair.getKey() == key)
@@ -536,7 +538,7 @@ namespace dsc
             }
             const V& get(const K& key) const
             {
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 for (auto& pair : arr[index])
                 {
                     if (pair.getKey() == key)
@@ -548,7 +550,7 @@ namespace dsc
             }
             V& get(const K& key)
             {
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 for (auto& pair : arr[index])
                 {
                     if (pair.getKey() == key)
@@ -560,7 +562,7 @@ namespace dsc
             }
             bool contains(const K& key) const
             {
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 for (const auto& pair : arr[index])
                 {
                     if (pair.getKey() == key)
@@ -612,7 +614,7 @@ namespace dsc
             }
             void remove(const K& key)
             {
-                size_t index = Hash<K>()(key) % capacity;
+                size_t index = hashFunc(key) % capacity;
                 for (auto& pair : arr[index])
                 {
                     if (pair.getKey() == key)

@@ -10,11 +10,17 @@ namespace dshw
     template <typename T>
     class Hash
     {
-        public:
-            size_t operator()(const T& key) const
+    public:
+        size_t operator()(const T& key) const
+        {
+            const unsigned char* data = reinterpret_cast<const unsigned char*>(&key);
+            size_t hash = 0;
+            for (size_t i = 0; i < sizeof(T); ++i)
             {
-                return reinterpret_cast<size_t>(&key);
+                hash = hash * 131 + data[i]; // 131 is a common prime multiplier
             }
+            return hash;
+        }
     };
 
     template <>
