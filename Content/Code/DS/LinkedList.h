@@ -232,6 +232,7 @@ namespace dsc
             private:
                 Node<T>* current;
             public:
+                iterator() : current(nullptr) {}
                 iterator(Node<T>* start) : current(start) {}
 
                 T& operator*()
@@ -281,6 +282,7 @@ namespace dsc
                 private:
                     Node<T>* current;
                 public:
+                    const_iterator() : current(nullptr) {}
                     const_iterator(Node<T>* start) : current(start) {}
                     const T& operator*() const
                     {
