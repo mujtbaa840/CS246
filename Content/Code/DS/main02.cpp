@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <unordered_map>
 #include "Map.h"
 
 using namespace std;
@@ -86,17 +87,36 @@ vector<int> twoSum(const vector<int>& nums, int target)
 
 int main()
 {
-    testMap();
-    cout << endl;
-    testMap2();
-    cout << endl;
+    // testMap();
+    // cout << endl;
+    // testMap2();
+    // cout << endl;
 
-    vector<int> nums = {10, 5, 3, 7};
-    int target = 17;
+    // vector<int> nums = {10, 5, 3, 7};
+    // int target = 11;
 
-    vector<int> result = twoSum(nums, target);
+    // vector<int> result = twoSum(nums, target);
 
-    cout << "{" << result[0] << ", " << result[1] << "}" << endl;
+    
+    // if (result.size() > 0)
+    // {
+    //     cout << "{" << result[0] << ", " << result[1] << "}" << endl;
+    // }
+    // else
+    // {
+    //     cout << "{}" << endl;
+    // }
+
+    Map<string, string> phonebook;
+
+    phonebook.put("Arnold", "123-456-7890");
+    phonebook["Beverly"] = "987-654-3210";
+
+    cout << phonebook["Beverly"] << endl;
+    cout << phonebook.get("Arnold") << endl;
+    
+    unordered_map<int, int> myMap;
+    using Map1 = unordered_map<int,int>;
 
 
     return 0;

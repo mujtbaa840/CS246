@@ -209,6 +209,11 @@ namespace dshw
                 return count;
             }
 
+            bool isEmpty() const
+            {
+                return count == 0;
+            } 
+
             string toString() const override
             {
                 stringstream out;

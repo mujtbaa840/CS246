@@ -227,6 +227,11 @@ namespace dsc
                 return out.str();    
             }
 
+            bool isEmpty() const
+            {
+                return count == 0;
+            }
+
             class iterator
             {
             private:

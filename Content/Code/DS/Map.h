@@ -288,6 +288,31 @@ namespace dsc
                 throw out_of_range("Key not found in Map");
             }
 
+            bool operator==(const MapOpen<K, V>& other) const
+            {
+                if (count != other.count)
+                {
+                    return false;
+                }
+                // check if this map's key-value pairs are in other map
+                for (size_t i = 0; i < capacity; ++i)
+                {
+                    if (arr[i] != nullptr && arr[i] != DELETED)
+                    {
+                        if (!other.contains(arr[i]->getKey()) || other.get(arr[i]->getKey()) != arr[i]->getValue())
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            bool operator!=(const MapOpen<K, V>& other) const
+            {
+                return !(*this == other);
+            }
+
             class iterator
             {
                 private:
@@ -600,6 +625,29 @@ namespace dsc
                 throw out_of_range("Key not found in MapChain");
             }
 
+            bool operator==(const MapChain<K, V>& other) const
+            {
+                if (count != other.count)
+                {
+                    return false;
+                }
+                for (size_t i = 0; i < capacity; ++i)
+                {
+                    for (const auto& pair : arr[i])
+                    {
+                        if (!other.contains(pair.getKey()) || other.get(pair.getKey()) != pair.getValue())
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            bool operator!=(const MapChain<K, V>& other) const
+            {
+                return !(*this == other);
+            }
             class iterator
             {
                 private:
