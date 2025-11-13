@@ -70,13 +70,27 @@ namespace dshw
                 arr = new T*[capacity]{nullptr};
             }
             
-            SetOpen(std::initializer_list<T> initList) : SetOpen(initList.size())
+            SetOpen(std::initializer_list<T> initList) : SetOpen(std::max(INITIAL_CAPACITY, initList.size()))
             {
                 for (const T& value : initList)
                 {
                     insert(value);
                 }
             }
+
+            SetOpen<T>& operator=(std::initializer_list<T> initList)
+            {
+                clear();
+                capacity = std::max(INITIAL_CAPACITY, initList.size());
+                count = 0;
+                arr = new T*[capacity]{nullptr};
+                for (const T& value : initList)
+                {
+                    insert(value);
+                }
+                return *this;
+            }
+
             SetOpen(const SetOpen<T>& obj) : capacity(obj.capacity), count(obj.count)
             {
                 arr = new T*[capacity]{nullptr};
@@ -363,13 +377,27 @@ namespace dshw
                     }
                     arr = new LinkedList<T>[capacity];
                 }
-                SetChain(std::initializer_list<T> initList) : SetChain(initList.size())
+                SetChain(std::initializer_list<T> initList) : SetChain(std::max(INITIAL_CAPACITY, initList.size()))
                 {
                     for (const T& value : initList)
                     {
                         insert(value);
                     }
                 }
+
+                SetChain<T>& operator=(std::initializer_list<T> initList)
+                {
+                    delete[] arr;
+                    capacity = std::max(INITIAL_CAPACITY, initList.size());
+                    count = 0;
+                    arr = new LinkedList<T>[capacity];
+                    for (const T& value : initList)
+                    {
+                        insert(value);
+                    }
+                    return *this;
+                }
+
                 SetChain(const SetChain<T>& obj) : capacity(obj.capacity), count(obj.count)
                 {
                     arr = new LinkedList<T>[capacity];

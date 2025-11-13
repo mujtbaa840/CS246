@@ -71,6 +71,28 @@ namespace dsc
                 }
                 arr = new Pair<K, V>*[capacity]{nullptr};
             }
+
+            MapOpen(std::initializer_list<Pair<K, V>> initList) : MapOpen(std::max(INITIAL_CAPACITY, initList.size()))
+            {
+                for (const Pair<K, V>& p : initList)
+                {
+                    put(p.getKey(), p.getValue());
+                }
+            }
+
+            MapOpen<K, V>& operator=(std::initializer_list<Pair<K, V>> initList)
+            {
+                clear();
+                capacity = std::max(INITIAL_CAPACITY, initList.size());
+                count = 0;
+                arr = new Pair<K, V>*[capacity]{nullptr};
+                for (const Pair<K, V>& p : initList)
+                {
+                    put(p.getKey(), p.getValue());
+                }
+                return *this;
+            }
+
             MapOpen(const MapOpen<K, V>& obj) : capacity(obj.capacity), count(obj.count)
             {
                 arr = new Pair<K, V>*[capacity]{nullptr};
@@ -295,7 +317,6 @@ namespace dsc
                 {
                     return false;
                 }
-                // check if this map's key-value pairs are in other map
                 for (size_t i = 0; i < capacity; ++i)
                 {
                     if (arr[i] != nullptr && arr[i] != DELETED)
@@ -308,7 +329,6 @@ namespace dsc
                 }
                 return true;
             }
-
             bool operator!=(const MapOpen<K, V>& other) const
             {
                 return !(*this == other);
@@ -471,6 +491,28 @@ namespace dsc
                 }
                 arr = new LinkedList<Pair<K, V>>[capacity];
             }
+
+            MapChain(std::initializer_list<Pair<K, V>> initList) : MapChain(std::max(INITIAL_CAPACITY, initList.size()))
+            {
+                for (const Pair<K, V>& p : initList)
+                {
+                    put(p.getKey(), p.getValue());
+                }
+            }
+
+            MapChain<K, V>& operator=(std::initializer_list<Pair<K, V>> initList)
+            {
+                clear();
+                capacity = std::max(INITIAL_CAPACITY, initList.size());
+                count = 0;
+                arr = new LinkedList<Pair<K, V>>[capacity];
+                for (const Pair<K, V>& p : initList)
+                {
+                    put(p.getKey(), p.getValue());
+                }
+                return *this;
+            }
+
             MapChain(const MapChain<K, V>& obj) : capacity(obj.capacity), count(obj.count)
             {
                 arr = new LinkedList<Pair<K, V>>[capacity];
@@ -650,6 +692,7 @@ namespace dsc
             {
                 return !(*this == other);
             }
+
             class iterator
             {
                 private:
@@ -677,7 +720,7 @@ namespace dsc
                         }
                         advanceToNextValid();
                     }
-                    Pair<K, V>& operator*() const
+                    Pair<K, V>& operator*()
                     {
                         return *listIt;
                     }
