@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstdint>
+#include "Pair.h"
 
 namespace dshw
 {
@@ -91,6 +92,22 @@ namespace dshw
             {
                 return key ? 1u : 0u;
             }
+    };
+
+    template <typename K, typename V>
+    class Hash<Pair<K,V>>
+    {
+    public:
+        size_t operator()(const Pair<K,V>& p) const
+        {
+            Hash<K> hashK;
+            Hash<V> hashV;
+
+            size_t h1 = hashK(p.getKey());
+            size_t h2 = hashV(p.getValue());
+            
+            return h1 ^ (h2 + 0x9e3779b97f4a7c15ULL + (h1 << 6) + (h1 >> 2));
+        }
     };
 }
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstdint>
+#include "Pair.h"
 
 namespace dsc
 {
@@ -17,7 +18,7 @@ namespace dsc
             size_t hash = 0;
             for (size_t i = 0; i < sizeof(T); ++i)
             {
-                hash = hash * 131 + data[i];
+                hash = hash * 131 + data[i]; // 131 is a common prime multiplier
             }
             return hash;
         }
@@ -91,6 +92,22 @@ namespace dsc
             {
                 return key ? 1u : 0u;
             }
+    };
+
+    template <typename K, typename V>
+    class Hash<Pair<K,V>>
+    {
+    public:
+        size_t operator()(const Pair<K,V>& p) const
+        {
+            Hash<K> hashK;
+            Hash<V> hashV;
+
+            size_t h1 = hashK(p.getKey());
+            size_t h2 = hashV(p.getValue());
+            
+            return h1 ^ (h2 + 0x9e3779b97f4a7c15ULL + (h1 << 6) + (h1 >> 2));
+        }
     };
 }
 
