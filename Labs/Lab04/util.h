@@ -6,8 +6,13 @@
 #include <vector>
 #include "Node.h"
 
+
+
 namespace dsl
 {
+    template <typename T>
+    using Node = NodeD<T>;
+    
     template <typename T>
     void Swap(T& a, T& b)
     {
