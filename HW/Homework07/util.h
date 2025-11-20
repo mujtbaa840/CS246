@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iomanip>
+#include "Pair.h"
 
 namespace dshw
 {
@@ -15,7 +16,32 @@ namespace dshw
         return c == ' ' || c == '\n' || c == '\t';
     }
 
-    std::string getRomanNumeral(unsigned int length=5)
+    std::string getRomanNumeral(int num = 1)
+    {
+        if (num < 1 || num > 3999)
+        {
+            num = randomInt(1, 3999);
+        }
+        std::vector<Pair<int, std::string>> valToRoman = {
+            {1000, "M"}, {900, "CM"}, {500, "D"}, {400, "CD"},
+            {100, "C"}, {90, "XC"}, {50, "L"}, {40, "XL"},
+            {10, "X"}, {9, "IX"}, {5, "V"}, {4, "IV"},
+            {1, "I"}
+        };
+
+        std::string roman;
+        for (const auto& pair : valToRoman)
+        {
+            while (num >= pair.getKey())
+            {
+                roman += pair.getValue();
+                num -= pair.getKey();
+            }
+        }
+        return roman;
+    }
+
+    unsigned int randomInt(unsigned int min, unsigned int max)
     {
         static bool seeded = false;
         if (!seeded)
@@ -23,18 +49,14 @@ namespace dshw
             srand(static_cast<unsigned int>(time(nullptr)));
             seeded = true;
         }
-        std::string romans = "IVXLCDM";
-        if (length == 0 || length > 7)
+        if (min >= max)
         {
-            length = 5;
+            return min;
         }
-        std::string result;
-        for (unsigned int i = 0; i < length; ++i)
-        {
-            result += romans[rand() % romans.size()];
-        }
-        return result;
+        return min + rand() % (max - min + 1);
     }
+
+
     void printVector(const std::vector<int>& vec)
     {
         std::cout << "[";
