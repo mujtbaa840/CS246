@@ -175,38 +175,54 @@ namespace dsc
                 return arr[--count];
             }
 
-            T& operator[](size_t index)
+            T& operator[](int index)
             {
-                if (index >= count)
+                if (index >= count || index < -static_cast<int>(count))
                 {
                     throw std::out_of_range("Index out of range");
+                }
+                if (index < 0 && static_cast<size_t>(-index) <= count)
+                {
+                    index = count + index;
                 }
                 return arr[index];
             }
 
-            const T& operator[](size_t index) const
+            const T& operator[](int index) const
             {
-                if (index >= count)
+                if (index >= count || index < -static_cast<int>(count))
                 {
                     throw std::out_of_range("Index out of range");
+                }
+                if (index < 0 && static_cast<size_t>(-index) <= count)
+                {
+                    index = count + index;
                 }
                 return arr[index];
             }
 
-            T& at(size_t index)
+            T& at(int index)
             {
-                if (index >= count)
+                if (index >= count || index < -static_cast<int>(count))
                 {
                     throw std::out_of_range("Index out of range");
+                }
+                if (index < 0 && static_cast<size_t>(-index) <= count)
+                {
+                    index = count + index;
                 }
                 return arr[index];
             }
 
-            const T& at(size_t index) const
+            const T& at(int index) const
             {
-                if (index >= count)
+                if (index >= count || index < -static_cast<int>(count))
                 {
                     throw std::out_of_range("Index out of range");
+                }
+                if (index < 0 && static_cast<size_t>(-index) <= count)
+                {
+                    index = count + index;
                 }
                 return arr[index];
             }
