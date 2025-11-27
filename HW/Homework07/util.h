@@ -16,6 +16,21 @@ namespace dshw
         return c == ' ' || c == '\n' || c == '\t';
     }
 
+    unsigned int randomInt(unsigned int min, unsigned int max)
+    {
+        static bool seeded = false;
+        if (!seeded)
+        {
+            srand(static_cast<unsigned int>(time(nullptr)));
+            seeded = true;
+        }
+        if (min >= max)
+        {
+            return min;
+        }
+        return min + rand() % (max - min + 1);
+    }
+
     std::string getRomanNumeral(int num = 1)
     {
         if (num < 1 || num > 3999)
@@ -40,22 +55,6 @@ namespace dshw
         }
         return roman;
     }
-
-    unsigned int randomInt(unsigned int min, unsigned int max)
-    {
-        static bool seeded = false;
-        if (!seeded)
-        {
-            srand(static_cast<unsigned int>(time(nullptr)));
-            seeded = true;
-        }
-        if (min >= max)
-        {
-            return min;
-        }
-        return min + rand() % (max - min + 1);
-    }
-
 
     void printVector(const std::vector<int>& vec)
     {
